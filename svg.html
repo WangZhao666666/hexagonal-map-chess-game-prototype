@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        svg g {
+            cursor: pointer;
+        }
+
+        .svg-box {
+            display: flex;
+        }
+
+        .svg-box .svg-tips {
+            flex: 1;
+        }
+
+        .inline {
+            display: flex;
+            align-items: center;
+        }
+
+        .inline .label {
+            margin-right: 10px;
+        }
+
+        .inline .small-label {
+            margin: 5px 0;
+            width: 100px;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .inline .color-box {
+            width: 18px;
+            height: 18px;
+            border: 1px solid transparent;
+        }
+
+        .color-box.normal {
+            background-color: rgba(0,0,255,0.3);
+            border-color: #0000ff;
+        }
+
+        .color-box.start {
+            background-color: rgba(0,255,0,0.3);
+            border-color: #00ff00;
+        }
+
+        .color-box.end {
+            background-color: rgba(255,0,255,0.3);
+            border-color: #ff00ff;
+        }
+
+        .color-box.route {
+            background-color: rgba(255,255,0,0.3);
+            border-color: #ffff00;
+        }
+
+        .color-box.move_range {
+            background-color: rgba(255,0,0,0.3);
+            border-color: #ff0000;
+        }
+
+        .color-box.attack_range {
+            background-color: rgba(0,255,255,0.3);
+            border-color: #00ffff;
+        }
+
+        .color-box.disable {
+            background-color: rgba(0,0,0,0.3);
+            border-color: #000000;
+        }
+
+        .el-switch {
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            font-size: 14px;
+            line-height: 20px;
+            height: 32px;
+            vertical-align: middle;
+        }
+
+        .el-switch__input {
+            position: absolute;
+            width: 0;
+            height: 0;
+            opacity: 0;
+            margin: 0;
+        }
+
+        .el-switch__core {
+            display: inline-flex;
+            position: relative;
+            align-items: center;
+            min-width: 40px;
+            height: 20px;
+            border: 1px solid #dcdfe6;
+            outline: none;
+            border-radius: 10px;
+            box-sizing: border-box;
+            background: #dcdfe6;
+            cursor: pointer;
+            transition: border-color .3s, background-color .3s;
+        }
+
+        .el-switch__core .el-switch__action {
+            position: absolute;
+            left: 1px;
+            border-radius: 100%;
+            transition: all .3s;
+            width: 16px;
+            height: 16px;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #dcdfe6;
+        }
+
+        .el-switch.is-checked .el-switch__core {
+            border-color: #409eff;
+            background-color: #409eff;
+        }
+
+        .el-switch.is-checked .el-switch__core .el-switch__action {
+            left: calc(100% - 17px);
+            color: #409eff;
+        }
+
+        .el-input {
+            position: relative;
+            font-size: 14px;
+            display: inline-flex;
+            width: 300px;
+            line-height: 32px;
+            box-sizing: border-box;
+            vertical-align: middle;
+        }
+
+        .el-input__wrapper {
+            display: inline-flex;
+            flex-grow: 1;
+            align-items: center;
+            justify-content: center;
+            padding: 1px 11px;
+            background-color: #ffffff;
+            background-image: none;
+            border-radius: 4px;
+            transition: box-shadow .2s cubic-bezier(.645, .045, .355, 1);
+            box-shadow: 0 0 0 1px #dcdfe6 inset;
+        }
+
+        .el-input__inner {
+            width: 100%;
+            flex-grow: 1;
+            -webkit-appearance: none;
+            color: #606266;
+            font-size: inherit;
+            height: 30px;
+            line-height: 30px;
+            padding: 0;
+            outline: none;
+            border: none;
+            background: none;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="svg-box">
+        <svg id="mySvg" width="400" height="300" style="border: 1px solid #eee;"></svg>
+        <div class="svg-tips">
+            <div class="inline">
+                <p class="small-label">正常</p>
+                <div class="color-box normal"></div>
+            </div>
+            <div class="inline">
+                <p class="small-label">起点</p>
+                <div class="color-box start"></div>
+            </div>
+            <div class="inline">
+                <p class="small-label">终点</p>
+                <div class="color-box end"></div>
+            </div>
+            <div class="inline">
+                <p class="small-label">路径</p>
+                <div class="color-box route"></div>
+            </div>
+            <div class="inline">
+                <p class="small-label">移动范围</p>
+                <div class="color-box move_range"></div>
+            </div>
+            <div class="inline">
+                <p class="small-label">攻击范围</p>
+                <div class="color-box attack_range"></div>
+            </div>
+            <div class="inline">
+                <p class="small-label">障碍</p>
+                <div class="color-box disable"></div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="inline">
+            <p class="label">是否显示移动范围</p>
+            <div class="move-range el-switch is-checked">
+                <span class="el-switch__core">
+                    <div class="el-switch__action"></div>
+                </span>
+            </div>
+        </div>
+        <div class="inline">
+            <p class="label">是否显示攻击范围</p>
+            <div class="attack-range el-switch is-checked">
+                <span class="el-switch__core">
+                    <div class="el-switch__action"></div>
+                </span>
+            </div>
+        </div>
+        <div class="inline">
+            <p class="label">是否点击设置障碍</p>
+            <div class="set-disable el-switch">
+                <span class="el-switch__core">
+                    <div class="el-switch__action"></div>
+                </span>
+            </div>
+        </div>
+        <div class="inline">
+            <p class="label">移动步数</p>
+            <div class="set-move-steps el-input">
+                <div class="el-input__wrapper">
+                    <input class="el-input__inner" min="0" type="number" autocomplete="off" value="3" tabindex="0"
+                        placeholder="输入移动步数(默认为3)">
+                </div>
+            </div>
+        </div>
+        <div class="inline">
+            <p class="label">攻击距离</p>
+            <div class="set-attack-distance el-input">
+                <div class="el-input__wrapper">
+                    <input class="el-input__inner" min="0" type="number" autocomplete="off" value="2" tabindex="1"
+                        placeholder="输入攻击步数(默认为2)">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // svg容器
+        var svg = document.getElementById("mySvg");
+        // 六边形计算时用到的参数
+        const degree = (2 * Math.PI) / 6;
+        // 创建svg元素需要用到的
+        const ns = 'http://www.w3.org/2000/svg';
+
+        // 互动参数
+        // 是否显示移动范围
+        let isShowMoveRange = true
+        document.querySelector('.move-range').addEventListener('click', function () {
+            this.classList.toggle('is-checked')
+            isShowMoveRange = !isShowMoveRange
+        })
+        // 是否显示攻击范围
+        let isShowAttackRange = true
+        document.querySelector('.attack-range').addEventListener('click', function () {
+            this.classList.toggle('is-checked')
+            isShowAttackRange = !isShowAttackRange
+        })
+        // 是否点击设置障碍
+        let isSetDisable = false
+        document.querySelector('.set-disable').addEventListener('click', function () {
+            this.classList.toggle('is-checked')
+            isSetDisable = !isSetDisable
+        })
+        // 移动范围
+        let globeMoveRange = 3
+        console.log(document.querySelector('.set-move-steps .el-input__inner'));
+        document.querySelector('.set-move-steps .el-input__inner').addEventListener('input', function () {
+            globeMoveRange = this.value || 0
+        })
+        // 攻击范围
+        let globeAttackRange = 2
+        document.querySelector('.set-attack-distance .el-input__inner').addEventListener('input', function () {
+            globeAttackRange = this.value || 0
+        })
+
+        // grid格子对象
+        class Grid {
+            constructor(pos, center) {
+                // id就是坐标文本,用于查找
+                this.id = `${pos.x},${pos.y}`
+                // 坐标
+                this.pos = pos
+                // 中心点
+                this.center = center
+                // 三维坐标
+                this.cubePos = getCubePosFromPos(pos)
+                // 图形
+                this.polygon = null
+                // 状态,normal:正常,disable:障碍,start:开始点,end:结束点,route:路径,range:范围
+                this.state = 'normal'
+            }
+            // 绘制方法,传入 六边形尺寸,六边形填充颜色,六边形边框颜色,文字颜色
+            draw(size, fillColor = "#fff", strokeColor = "#ccc", textColor = "#000") {
+                if (this.polygon) {
+                    this.polygon.remove()
+                    this.polygon = null
+                }
+                // 绘制每个格子上显示的信息
+                const text = drawPosition(this.center.x - 12, this.center.y, `[${this.pos.x},${this.pos.y}]`, textColor)
+                // 绘制六边形
+                this.polygon = createPolygon(this.center.x, this.center.y, size, fillColor, strokeColor)
+                // 监听点击事件
+                this.polygon.onclick = () => {
+                    if (isSetDisable) return this.setState(this.state === 'disable' ? 'normal' : 'disable')
+                    if (this.state === 'disable') return
+                    if (this.state === 'start') {
+                        // 如果当前状态是起点状态,清除所有格子状态
+                        gridObjs.forEach(item => {
+                            if (item.state !== 'normal' && item.state !== 'disable') {
+                                item.setState('normal')
+                            }
+                        })
+                    } else if (this.state === 'end') {
+                        const startGrid = gridObjs.find(item => item.state === 'start')
+                        // 如果当前状态是终点状态,则清除路径和攻击范围以及当前格子状态
+                        this.setState('normal')
+                        if (isShowAttackRange) this.showAttackRange(false)
+                        this.showRoute(false)
+                        // 重新显示移动范围
+                        if (isShowMoveRange) startGrid.showMoveRange()
+                    } else {
+                        // 如果当前状态是正常
+                        const startGrid = gridObjs.find(item => item.state === 'start')
+                        const endGrid = gridObjs.find(item => item.state === 'end')
+                        if (endGrid) {
+                            // 已经有终点格子,则,将当前格子设置为终点格子,重新设置攻击范围和路径
+                            endGrid.setState('normal')
+                            if (isShowAttackRange) endGrid.showAttackRange(false)
+                            endGrid.showRoute(false)
+                            this.setState('end')
+                            if (isShowAttackRange) this.showAttackRange()
+                            this.showRoute(startGrid)
+                        } else if (startGrid) {
+                            // 没有终点格子,但有起点格子,则将当前格子设置为终点
+                            this.setState('end')
+                            // 关闭移动范围的显示
+                            if (isShowMoveRange) startGrid.showMoveRange(false)
+                            // 显示攻击范围
+                            if (isShowAttackRange) this.showAttackRange()
+                            // 路径
+                            this.showRoute(startGrid)
+                        } else {
+                            // 没有选中,则将当前格子设置为起点格子
+                            this.setState('start')
+                            // 显示移动范围
+                            if (isShowMoveRange) this.showMoveRange()
+                        }
+                    }
+                }
+                this.polygon.appendChild(text)
+                svg.appendChild(this.polygon)
+            }
+            // 改变当前格子状态
+            setState(state) {
+                if (!this.polygon) return
+                // 填充颜色
+                let fillColor = ''
+                // 边框颜色
+                let strokeColor = ''
+                if (state === 'normal') {
+                    fillColor = 'rgba(0,0,255,0.3)'
+                    strokeColor = '#0000ff'
+                } else if (state === 'start') {
+                    fillColor = 'rgba(0,255,0,0.3)'
+                    strokeColor = '#00ff00'
+                } else if (state === 'end') {
+                    fillColor = 'rgba(255,0,255,0.3)'
+                    strokeColor = '#ff00ff'
+                } else if (state === 'route') {
+                    fillColor = 'rgba(255,255,0,0.3)'
+                    strokeColor = '#ffff00'
+                } else if (state === 'move_range') {
+                    fillColor = 'rgba(255,0,0,0.3)'
+                    strokeColor = '#ff0000'
+                } else if (state === 'attack_range') {
+                    fillColor = 'rgba(0,255,255,0.3)'
+                    strokeColor = '#00ffff'
+                } else if (state === 'disable') {
+                    fillColor = 'rgba(0,0,0,0.3)'
+                    strokeColor = '#000000'
+                }
+                this.state = state
+                this.polygon.querySelector('polygon').setAttribute('style', `fill:${fillColor};stroke:${strokeColor};stroke-width:1`)
+            }
+            // 获取当前格子的邻居格子
+            getGridNeighbors() {
+                let neighbors = [
+                    getPosFromCubePos({ x: this.cubePos.x, y: this.cubePos.y - 1, z: this.cubePos.z + 1 }),
+                    getPosFromCubePos({ x: this.cubePos.x, y: this.cubePos.y + 1, z: this.cubePos.z - 1 }),
+                    getPosFromCubePos({ x: this.cubePos.x - 1, y: this.cubePos.y, z: this.cubePos.z + 1 }),
+                    getPosFromCubePos({ x: this.cubePos.x + 1, y: this.cubePos.y, z: this.cubePos.z - 1 }),
+                    getPosFromCubePos({ x: this.cubePos.x - 1, y: this.cubePos.y + 1, z: this.cubePos.z }),
+                    getPosFromCubePos({ x: this.cubePos.x + 1, y: this.cubePos.y - 1, z: this.cubePos.z }),
+                ]
+                return neighbors.map(neighbor => gridObjs.find(item => item.id === `${neighbor.x},${neighbor.y}`) || null).filter(item => item)
+            }
+            // 计算和其他格子的距离
+            getGridDistance(grid) {
+                return (Math.abs(this.cubePos.x - grid.cubePos.x) + Math.abs(this.cubePos.y - grid.cubePos.y) + Math.abs(this.cubePos.z - grid.cubePos.z)) / 2
+            }
+            // 计算和其他格子的路径(A*算法)
+            getGridRoute(targetGrid) {
+                // 被考虑计算的格子列表,初始时添加当前格子
+                const open = [{ grid: this, g: 0, h: this.getGridDistance(targetGrid) }]
+                // 不会被考虑计算的格子列表
+                const close = []
+                while (open.length > 0 && open.every(item => item.grid !== targetGrid)) {
+                    // 最小的f值
+                    const minF = Math.min(...open.map(item => item.g + item.h))
+                    // 从open列表中选出f值最小的格子作为当前计算的格子
+                    const minFIndex = open.findIndex(item => item.g + item.h === minF)
+                    const minFGrid = open[minFIndex]
+                    // 将这个格子从open列表转到close列表
+                    close.push(...open.splice(minFIndex, 1))
+                    // 获取相邻格子
+                    let neighborsGrids = minFGrid.grid.getGridNeighbors()
+                    // 去掉障碍和close中的格子
+                    neighborsGrids = neighborsGrids.filter(neighbor => neighbor.state !== 'disable' && close.every(item => item.grid !== neighbor))
+                    neighborsGrids.forEach(neighbor => {
+                        // 查找open列表中是否存在该格子
+                        const openNeighbor = open.find(item => item.grid === neighbor)
+                        if (openNeighbor) {
+                            // 存在,判断g值是否更低
+                            if (openNeighbor.g > minFGrid.g + 1) {
+                                // 新路线g值更低,则更新父节点和g值
+                                openNeighbor.parent = minFGrid
+                                openNeighbor.g = minFGrid.g + 1
+                            }
+                        } else {
+                            // 不存在,直接将该格子放入open列表
+                            open.push({
+                                grid: neighbor,
+                                parent: minFGrid,
+                                g: minFGrid.g + 1,
+                                h: neighbor.getGridDistance(targetGrid)
+                            })
+                        }
+                    })
+                }
+                // open为空说明没有找到路径到达
+                if (open.length === 0) return []
+                // 生成路径数组
+                const routeTarget = open.find(item => item.grid === targetGrid)
+                const findParent = openGrid => {
+                    if (!openGrid.parent) return []
+                    const parentRoute = findParent(openGrid.parent)
+                    return [...parentRoute, openGrid.grid]
+                }
+                return findParent(routeTarget.parent)
+            }
+            // 获取步数之内所有能到达的格子
+            getStepsRange(steps) {
+                // 被考虑计算的格子列表,初始时添加当前格子
+                const open = [{ grid: this, step: 0 }]
+                // 步数内的格子列表
+                const range = []
+                for (let i = 0; i <= steps - 1; i++) {
+                    open.filter(item => item.step === i)
+                        .forEach(openGrid => {
+                            const index = open.findIndex(item => item === openGrid)
+                            // 将这个格子从open列表转到range列表
+                            range.push(...open.splice(index, 1))
+                            // 获取相邻格子
+                            let neighborsGrids = openGrid.grid.getGridNeighbors()
+                            // 去掉障碍和已经计算的格子
+                            neighborsGrids = neighborsGrids.filter(neighbor => neighbor.state !== 'disable' && range.every(item => item.grid !== neighbor) && open.every(item => item.grid !== neighbor))
+                            // 将这些格子放入open列表
+                            open.push(...neighborsGrids.map(item => ({ grid: item, step: i + 1 })))
+                        })
+                }
+                // 去掉步数为0的格子也就是自己
+                return [...open, ...range.filter(item => item.step !== 0)].map(item => item.grid)
+            }
+            // 获取范围之内所有的格子
+            getDistanceRange(distances) {
+                // 被考虑计算的格子列表,初始时添加当前格子
+                const open = [{ grid: this, distance: 0 }]
+                // 步数内的格子列表
+                const range = []
+                for (let i = 0; i <= distances - 1; i++) {
+                    open.filter(item => item.distance === i)
+                        .forEach(openGrid => {
+                            const index = open.findIndex(item => item === openGrid)
+                            // 将这个格子从open列表转到range列表
+                            range.push(...open.splice(index, 1))
+                            // 获取相邻格子
+                            let neighborsGrids = openGrid.grid.getGridNeighbors()
+                            // 去掉障碍和已经计算的格子
+                            neighborsGrids = neighborsGrids.filter(neighbor => range.every(item => item.grid !== neighbor) && open.every(item => item.grid !== neighbor))
+                            // 将这些格子放入open列表
+                            open.push(...neighborsGrids.map(item => ({ grid: item, distance: i + 1 })))
+                        })
+                }
+                // 去掉距离为0的格子也就是自己,去掉障碍格子
+                return [...open, ...range].filter(item => item.distance !== 0 && item.grid.state !== 'disable').map(item => item.grid)
+            }
+            // 显示当前格子的移动范围
+            showMoveRange(flag = true) {
+                if (flag) {
+                    this.getStepsRange(globeMoveRange).forEach(item => {
+                        item.setState('move_range')
+                    })
+                } else {
+                    gridObjs.forEach(item => {
+                        if (item.state === 'move_range') {
+                            item.setState('normal')
+                        }
+                    })
+                }
+            }
+            // 显示当前格子的攻击范围
+            showAttackRange(flag = true) {
+                if (flag) {
+                    this.getDistanceRange(globeAttackRange).forEach(item => {
+                        if(item.state !== 'start') item.setState('attack_range')
+                    })
+                } else {
+                    gridObjs.forEach(item => {
+                        if (item.state === 'attack_range') {
+                            item.setState('normal')
+                        }
+                    })
+                }
+            }
+            // 显示从某个格子到当前格子的路径
+            showRoute(startGrid) {
+                if (startGrid) {
+                    this.getGridRoute(startGrid).forEach(route => {
+                        route.setState('route')
+                    })
+                } else {
+                    gridObjs.forEach(item => {
+                        if (item.state === 'route') {
+                            item.setState('normal')
+                        }
+                    })
+                }
+            }
+        }
+
+        // 根据宽高和size设置数组存储中心点
+        function countGrids(size) {
+            // 画布宽高
+            const svgWidth = svg.getBoundingClientRect().width
+            const svgHeight = svg.getBoundingClientRect().height
+            // 每一行宽高
+            const gridWidth = Math.sin(degree) * size * 2
+            // 注意这里的高度其实并不是六边形实际的高度,
+            // 因为布局原因,并不需要六边形完整高度才可以进行下一行
+            const gridHeight = size + Math.cos(degree) * size
+            // 行数和列数
+            const rowNum = parseInt((svgHeight - Math.cos(degree) * size) / gridHeight)
+            const colNum = parseInt(svgWidth / gridWidth)
+            // 返回数组
+            return new Array(rowNum).fill(null).map((item, index) => {
+                let row = []
+                // 每一行y坐标是一样的,可以提前算出来
+                const y = gridHeight * index + size
+                if (index % 2 === 0) {
+                    // 奇数行
+                    row = new Array(colNum).fill(null).map((item, index) => ({
+                        x: gridWidth * index + Math.sin(degree) * size,
+                        y
+                    }))
+                } else {
+                    // 偶数行
+                    row = new Array(colNum - 1).fill(null).map((item, index) => ({
+                        x: gridWidth * (index + 1),
+                        y
+                    }))
+                }
+                return row
+            })
+        }
+        // 保存中心点数组
+        const grids = countGrids(20)
+
+        const gridObjs = []
+        // 绘制所有格子
+        grids.forEach((row, rowIndex) => {
+            row.forEach((col, colIndex) => {
+                gridObjs.push(new Grid({ x: rowIndex, y: colIndex }, { x: col.x, y: col.y }))
+            })
+        });
+
+        gridObjs.forEach(item => item.draw(20, "rgba(0,0,255,0.3)", "#0000ff"))
+
+        // 绘制六边形
+        function createPolygon(dx, dy, size, fillColor, strokeColor) {
+            let points = ""
+
+            for (var i = 0; i < 6; i++) {
+                var x = Math.sin(i * degree) * size + dx;
+                var y = Math.cos(i * degree) * size + dy;
+                points += `${x},${y} `
+            }
+
+            // 这个是为了能显示文字建造的外部容器
+            const g = document.createElementNS(ns, 'g')
+            const polygon = document.createElementNS(ns, 'polygon')
+            polygon.setAttribute('points', points.trim())
+            polygon.setAttribute('style', `fill:${fillColor};stroke:${strokeColor};stroke-width:1`)
+            g.appendChild(polygon)
+
+            return g
+        }
+
+        // 绘制文字
+        function drawPosition(dx, dy, text, color) {
+            const textSvg = document.createElementNS(ns, 'text')
+            textSvg.setAttribute('x', dx)
+            textSvg.setAttribute('y', dy)
+            textSvg.setAttribute('fill', color)
+            textSvg.setAttribute('style', 'font-size: 12px;')
+            textSvg.innerHTML = text
+
+            return textSvg
+        }
+
+        // 二维坐标转换为三维坐标(立方体坐标)
+        function getCubePosFromPos(pos) {
+            const cubePos = {}
+            cubePos.x = pos.x
+            cubePos.y = pos.y - parseInt(pos.x / 2)
+            cubePos.z = -cubePos.y - cubePos.x
+            return cubePos
+        }
+
+        // 三维坐标转换为二维坐标
+        function getPosFromCubePos(cubePos) {
+            const pos = {}
+            pos.x = cubePos.x
+            pos.y = cubePos.y + parseInt(cubePos.x / 2)
+            return pos
+        }
+    </script>
+</body>
+
+</html>
